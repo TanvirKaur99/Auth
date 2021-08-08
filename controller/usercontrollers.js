@@ -1,17 +1,23 @@
-require('../model/usermodel')
+require('../model/usermodel');
+require('../model/job');
 // const {registervalidation,loginvalidation}=require('../routes/validation')
 const mongoose=require("mongoose");
 const express=require('express');
 var passport=require('passport');
 const jwt=require('jsonwebtoken');
 var localpassport=require('passport-local').Strategy;
+const googleStrategy=require('passport-google-oauth').OAuth2Strategy;
 var session=require('express-session');
 
+
+
+
 var regData=mongoose.model('register');
+var jobData=mongoose.model('jobs');
 
 
 const app=express();
-const googleStrategy=require('passport-google-oauth').OAuth2Strategy;
+
 
 
 //middlewares
@@ -103,11 +109,7 @@ module.exports.loginGoogle=(req,res)=>{
 
         }));
         
-app.get('/auth/google',passport.authenticate('google',{scope:['profile','email']}));
-app.get('/auth/google/callback',passport.authenticate('google',{failureRedirect:'/error'}),
-function(req,res){
-    res.redirect('/success')
-});
+
         
 }
 
@@ -118,6 +120,47 @@ function(req,res){
 // module.exports.loginSucc=(req,res)=>{
 //     res.send(userProfile);
 // }
+
+//CREATING A JOB
+module.exports.createJob=(req,res)=>{
+var job=new jobData({
+    job_id:req.body.job_id,
+    job_name:req.body.job_name,
+    job_hours:req.body.job_hours
+});
+job.save().then((docs)=>{
+    return res.status(200).json({
+        message:"new job entered successfully",
+        success:true,
+        data:docs
+
+    })
+}).catch((err)=>{
+    return res.status(401).json({
+        message:"error in adding job",
+        success:false,
+        error:err.message
+    })
+})
+}
+
+module.exports.displayUserJoB=(req,res)=>{
+    return jobData.find({userid:req.params.userid}).populate('userid').exec().then((docs)=>{
+      return res.status(200).json({
+        success:true,
+        message:'list of jobs',
+        data:docs
+    })
+  }).catch((err)=>{
+    return res.status(400).json({
+      success:false,
+      message:'error in displaying jobs',
+      error:err.message
+  })
+  })
+  }
+
+
 
 
 

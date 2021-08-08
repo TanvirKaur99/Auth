@@ -1,3 +1,5 @@
+require('./usermodel');
+
 const mongoose=require('mongoose');
 
 
@@ -5,16 +7,21 @@ const mongoose=require('mongoose');
 var JobSchema=mongoose.Schema({
     job_id:{
         type:Number,
-        required:[true,"first name is required"]
+        required:[true,"job_id  is required"],
+        unique:[true,"job_id already exists"],
     },
     job_name:{
         type:String,
-        required:[true,"last name is required"]
+        required:[true,"job_name is required"]
     },
     job_hours:{
-        type:String,
-        unique:[true,"email already exists"],
-        required:[true,"email is required"],   
+        type:Number,
+        required:[true,"job_hours required"],   
     },
+    userid:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'register'
+      },
    
 });
+mongoose.model('jobs',JobSchema);
