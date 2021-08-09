@@ -19,9 +19,14 @@ var JobSchema=mongoose.Schema({
         required:[true,"job_hours required"],   
     },
     userid:{
-        type:mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref:'register'
       },
+      date:{
+        type:Date,
+        default:Date.now()
+      },
+    
    
 });
 mongoose.model('jobs',JobSchema);

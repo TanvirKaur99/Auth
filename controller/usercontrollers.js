@@ -1,37 +1,33 @@
-require('../model/usermodel');
-require('../model/job');
-// const {registervalidation,loginvalidation}=require('../routes/validation')
-const mongoose=require("mongoose");
+
+const mongoose = require('mongoose')
 const express=require('express');
 var passport=require('passport');
 const jwt=require('jsonwebtoken');
-var localpassport=require('passport-local').Strategy;
-const googleStrategy=require('passport-google-oauth').OAuth2Strategy;
+// var localpassport=require('passport-local').Strategy;
+// const googleStrategy=require('passport-google-oauth').OAuth2Strategy;
+
+let ObjectId = mongoose.Types.ObjectId;
+
+
+require('../model/usermodel');
+require('../model/job');
+require('../config/passportconfig')
+// const {registervalidation,loginvalidation}=require('../routes/validation')
+
+
 var session=require('express-session');
 
 
 
 
+//MODELS REFERENCES
 var regData=mongoose.model('register');
 var jobData=mongoose.model('jobs');
 
 
-const app=express();
 
 
-
-//middlewares
-app.use(session({
-    secret:'googleAuth',
-    saveUninitialized:'true',
-    resave:true
-}));
-
-app.use(passport.initialize());
-app.use(passport.session());
-
-
-//functions
+//FOR REGISTERING A NEW USER
 
 module.exports.addnew=(req,res)=>{
 // const {error}=registervalidation(req.body);
@@ -62,7 +58,10 @@ module.exports.addnew=(req,res)=>{
         })
     })
 }
-// authentication....  generate token if user is verified
+
+
+
+// AUTHENTICATION...GENERATING A TOKEN IF USER IS VALID 
 module.exports.authenticate=(req,res,next)=>{
     passport.authenticate('local',(err,user,info)=>{
         if(err) return res.status(404).json(err);
@@ -75,59 +74,18 @@ module.exports.authenticate=(req,res,next)=>{
   }
 
 
-module.exports.loginGoogle=(req,res)=>{
-    passport.authenticate('google',{scope:['profile','email']})
-    const GOOGLE_CLIENT_ID='649268603964-4smdaretsvq86a3hhpe5vnuertp9kt2b.apps.googleusercontent.com';
-    const GOOGLE_CLIENT_SECRET='Li0I104ifqDjd4PBBWrh5fuY'
-    
-    var userProfile; 
-    app.get('/error',(req,res)=>{
-        res.send('Error in login with gmail...') ; 
-      })
-      app.get('/success',(req,res)=>{
-          res.send(userProfile);
-          
-      })
-    passport.serializeUser((user,cb)=>{
-        return cb(null,user);
-    })
-    
-    passport.deserializeUser((obj,cb)=>{
-        return cb(null,obj);
-    })
-    
-    passport.use(new googleStrategy({
-        clientID:GOOGLE_CLIENT_ID,
-        clientSecret:GOOGLE_CLIENT_SECRET,
-        callbackURL:"http://localhost:3000/auth/google/callback"
-    },function(accessToken,refreshToken,profile,done){
-        userProfile=profile;
-        // if(!done){
-        //     res.redirect("/error")
-        // }
-        return done(null,userProfile);
-
-        }));
-        
-
-        
-}
-
-// module.exports.loginErr=(req,res)=>{
-//     res.send('Error in login with gmail...') ; 
-// }
-
-// module.exports.loginSucc=(req,res)=>{
-//     res.send(userProfile);
-// }
 
 //CREATING A JOB
 module.exports.createJob=(req,res)=>{
+    //console.log(req.body.userid.length)
+   
 var job=new jobData({
     job_id:req.body.job_id,
     job_name:req.body.job_name,
-    job_hours:req.body.job_hours
+    job_hours:req.body.job_hours,
+    userid:ObjectId(req.body.userid),
 });
+//console.log({job})
 job.save().then((docs)=>{
     return res.status(200).json({
         message:"new job entered successfully",
@@ -144,6 +102,8 @@ job.save().then((docs)=>{
 })
 }
 
+
+//FOR DISPLAYING THE NUMBER OF JOBS ASSIGNED TO A PARTICULAR USER
 module.exports.displayUserJoB=(req,res)=>{
     return jobData.find({userid:req.params.userid}).populate('userid').exec().then((docs)=>{
       return res.status(200).json({
@@ -160,7 +120,6 @@ module.exports.displayUserJoB=(req,res)=>{
   })
   }
 
-
-
+  
 
 
