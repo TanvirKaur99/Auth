@@ -5,8 +5,33 @@ var mongoose = require('mongoose');
 var express=require('express');
 var bodyparser=require('body-parser');
 
+const swaggerJSDoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
 
 const app=express();
+
+//SWAGGER
+
+const swaggerDefinition = {
+    openapi: '3.0.0',
+    info: {
+      title: 'Express API for JSONPlaceholder',
+      version: '1.0.0',
+    },
+  };
+  
+  const options = {
+    swaggerDefinition,
+    // Paths to files containing OpenAPI definitions
+    apis: ['./routes/*.js'],
+  };
+  
+  const swaggerSpec = swaggerJSDoc(options);
+  app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+ 
+
+
+
 
 
 app.use(bodyparser.json());
@@ -23,6 +48,8 @@ app.use(cors());
   res.setHeader("Access-Control-Allow-Credentials",true)
 
  })
+
+
 
 //server is created here
 const port=process.env.PORT||3200

@@ -61,7 +61,7 @@ module.exports.addnew=(req,res)=>{
 
 
 
-// AUTHENTICATION...GENERATING A TOKEN IF USER IS VALID 
+//AUTHENTICATION...GENERATING A TOKEN IF USER IS VALID 
 module.exports.authenticate=(req,res,next)=>{
     passport.authenticate('local',(err,user,info)=>{
         if(err) return res.status(404).json(err);
@@ -69,21 +69,35 @@ module.exports.authenticate=(req,res,next)=>{
             "token":jwt.sign({_id:user._id},"SecretToken",{expiresIn:'2000m'}),
             "user":user
         });
+        
         if(info) return res.status(401).json(info)
     })(req,res,next)
+     
   }
+  module.exports.tokenverify=(req,res, next)=>{
+    let decoded;
+    try {
+        decoded = jwt.verify(req.headers.token, "SecretToken");
+    }catch (e) {
+        console.error(e);
+    }
+    console.log("decoded",decoded);
+    req.body.decoded = decoded;
+    next();
+  }
+
 
 
 
 //CREATING A JOB
 module.exports.createJob=(req,res)=>{
-    //console.log(req.body.userid.length)
-   
+    console.log(req.body);
 var job=new jobData({
     job_id:req.body.job_id,
     job_name:req.body.job_name,
     job_hours:req.body.job_hours,
-    userid:ObjectId(req.body.userid),
+    // userid:ObjectId(req.body.userid),
+    userid:req.body.decoded._id
 });
 //console.log({job})
 job.save().then((docs)=>{
@@ -106,6 +120,7 @@ job.save().then((docs)=>{
 //FOR DISPLAYING THE NUMBER OF JOBS ASSIGNED TO A PARTICULAR USER
 module.exports.displayUserJoB=(req,res)=>{
     return jobData.find({userid:req.params.userid}).populate('userid').exec().then((docs)=>{
+        
       return res.status(200).json({
         success:true,
         message:'list of jobs',
@@ -119,6 +134,10 @@ module.exports.displayUserJoB=(req,res)=>{
   })
   })
   }
+
+
+
+  
 
   
 

@@ -19,6 +19,10 @@ passport.use(new localpassport({usernameField:'email'},
             else if(!user.verifyPassword(password))
             return done (null,false,{message:'password doesnot match'})
             else
+       
             return done (null,user);
-   })
+           
+   }
+  
+   )
   }))
