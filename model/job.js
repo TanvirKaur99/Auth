@@ -1,14 +1,18 @@
 require('./usermodel');
+require('../config/db');
 
 const mongoose=require('mongoose');
+//autoIncrement = require('mongoose-auto-increment');
+
+//autoIncrement.initialize(connection);
 
 
 //Schema for assigning task to user
 var JobSchema=mongoose.Schema({
     job_id:{
         type:Number,
-        required:[true,"job_id  is required"],
-        unique:[true,"job_id already exists"],
+        default:0
+        
     },
     job_name:{
         type:String,
@@ -29,4 +33,11 @@ var JobSchema=mongoose.Schema({
     
    
 });
+
 mongoose.model('jobs',JobSchema);
+// JobSchema.plugin(autoIncrement.plugin, {
+//     model: 'jobs',
+//     field: 'job_id',
+//     startAt: 10,
+//     incrementBy: 10
+// });

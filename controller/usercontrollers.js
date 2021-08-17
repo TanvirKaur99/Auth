@@ -82,7 +82,8 @@ module.exports.authenticate=(req,res,next)=>{
         console.error(e);
     }
     console.log("decoded",decoded);
-    req.body.decoded = decoded;
+    // req.body.decoded = decoded;
+    req.body.userid=decoded._id
     next();
   }
 
@@ -90,14 +91,21 @@ module.exports.authenticate=(req,res,next)=>{
 
 
 //CREATING A JOB
-module.exports.createJob=(req,res)=>{
+module.exports.createJob=async(req,res)=>{
     console.log(req.body);
+    //for finding the maximum jobid number
+    const num=await jobData.find({},{job_id: 1}).sort({job_id:-1}).limit(1)
+    console.log({num});
+    var idjob=num[0].job_id+1;
+    console.log(idjob);
+  
+
 var job=new jobData({
-    job_id:req.body.job_id,
+    job_id:idjob,
     job_name:req.body.job_name,
     job_hours:req.body.job_hours,
     // userid:ObjectId(req.body.userid),
-    userid:req.body.decoded._id
+    userid:req.body.userid
 });
 //console.log({job})
 job.save().then((docs)=>{
@@ -119,19 +127,25 @@ job.save().then((docs)=>{
 
 //FOR DISPLAYING THE NUMBER OF JOBS ASSIGNED TO A PARTICULAR USER
 module.exports.displayUserJoB=(req,res)=>{
-    return jobData.find({userid:req.params.userid}).populate('userid').exec().then((docs)=>{
-        
-      return res.status(200).json({
-        success:true,
-        message:'list of jobs',
-        data:docs
-    })
-  }).catch((err)=>{
-    return res.status(400).json({
-      success:false,
-      message:'error in displaying jobs',
-      error:err.message
-  })
+    console.log(req.body);
+    let jobdata=jobData.find({userid:req.body.userid}).exec().then((docs)=>{
+        let dataJob=docs;
+       console.log(docs);
+       regData.find({_id:req.body.userid}).exec().then((docs)=>{
+          let userinfo= {docs,dataJob}
+        return res.status(200).json({
+            success:true,
+            message:'list of jobs',
+            data:userinfo
+        })
+       }).catch((err)=>{
+        return res.status(400).json({
+          success:false,
+          message:'error in displaying jobs',
+          error:err.message
+      })
+      })
+         
   })
   }
 

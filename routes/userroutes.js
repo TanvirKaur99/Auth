@@ -126,10 +126,6 @@ var approute=express.Router();
  *           schema:
  *             type: object
  *             properties:
- *               job_id: 
- *                 type: number
- *                 description: Job Id created by user.  
- *                 example: 11 
  *               job_name: 
  *                 type: string
  *                 description: The Job's name.
@@ -152,13 +148,13 @@ var approute=express.Router();
 
  /**
  * @swagger
- * /getjob/{userid}:
+ * /getjob:
  *   get:
  *     summary: Retrieve Array of jobs created by a particular JSONPlaceholder user.
  *     description: Retrieve jobs JSONPlaceholder user.
  *     parameters: 
- *       - name: userid
- *         in: path
+ *       - in: header
+ *         name: token
  *         required: true
  *         schema: 
  *           type: string
@@ -172,6 +168,6 @@ var approute=express.Router();
 approute.post('/newuser',myctrl.addnew);   //for registering a user
 approute.post('/login',myctrl.authenticate);// for authenticating a user
 approute.post('/addjob',myctrl.tokenverify, myctrl.createJob);
-approute.get('/getjob/:userid',myctrl.displayUserJoB);
+approute.get('/getjob',myctrl.tokenverify, myctrl.displayUserJoB);
 
 module.exports=approute;
