@@ -115,10 +115,14 @@ var approute=express.Router();
  *     description: creating a job
  *     components: 
  *       securitySchemes: 
+ *     parameters: 
+ *       - in: header
+ *         name: token
+ *         required: true
  *     requestBody: 
  *       required: true 
  *       content:
- *         application/json:
+ *         application/x-www-form-urlencoded:
  *           schema:
  *             type: object
  *             properties:
@@ -148,35 +152,26 @@ var approute=express.Router();
 
  /**
  * @swagger
- * /getjob/{id}:
+ * /getjob/{userid}:
  *   get:
- *     summary: Retrieve a jobs created by a particular JSONPlaceholder user.
+ *     summary: Retrieve Array of jobs created by a particular JSONPlaceholder user.
  *     description: Retrieve jobs JSONPlaceholder user.
- *     responses:
- *       200:
- *         description: No.of jobs created by auser.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 data:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: integer
- *                       description: The user ID.
- *                       example: 0
- *                     name:
- *                       type: string
- *                       description: The user's name.
- *                       example: Leanne Graham
-*/
-
+ *     parameters: 
+ *       - name: userid
+ *         in: path
+ *         required: true
+ *         schema: 
+ *           type: string
+ *     responses: 
+ *       200: 
+ *          description: success
+ *       500:
+ *          description: failure        
+*/   
 
 approute.post('/newuser',myctrl.addnew);   //for registering a user
 approute.post('/login',myctrl.authenticate);// for authenticating a user
 approute.post('/addjob',myctrl.tokenverify, myctrl.createJob);
-approute.get('/getjob/:id',myctrl.displayUserJoB);
+approute.get('/getjob/:userid',myctrl.displayUserJoB);
 
 module.exports=approute;
