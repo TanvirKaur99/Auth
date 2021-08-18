@@ -1,5 +1,6 @@
 var express=require('express');
 var passport=require('passport');
+const multer=require('multer');
 //const validation = require('../routes/validation')
 var myctrl=require('../controller/usercontrollers');
 
@@ -122,7 +123,7 @@ var approute=express.Router();
  *     requestBody: 
  *       required: true 
  *       content:
- *         application/x-www-form-urlencoded:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
@@ -131,13 +132,16 @@ var approute=express.Router();
  *                 description: The Job's name.
  *                 example: Pickup
  *               job_hours:
- *                 type: number
+ *                 type: string
  *                 description: The Job hours.
  *                 example: 9
  *               job_date:
- *                  type: date
- *                  description: The date when Job was assigned
- *                  example: 2021-06-22T11:27:12.175+00:00        
+ *                 type: date
+ *                 description: The date when Job was assigned
+ *                 example: 2021-06-22T11:27:12.175+00:00
+ *               image:
+ *                 type: file  
+ *                 description: This is the Job Image
  *     responses:
  *       200:
  *         description: Job created successfully.
@@ -167,7 +171,9 @@ var approute=express.Router();
 
 approute.post('/newuser',myctrl.addnew);   //for registering a user
 approute.post('/login',myctrl.authenticate);// for authenticating a user
-approute.post('/addjob',myctrl.tokenverify, myctrl.createJob);
+approute.post('/addjob',myctrl.tokenverify,myctrl.createJob);
 approute.get('/getjob',myctrl.tokenverify, myctrl.displayUserJoB);
+approute.get('/file',myctrl.displayfile);
+//approute.post('/imageupload',myctrl.uploadimage);
 
 module.exports=approute;

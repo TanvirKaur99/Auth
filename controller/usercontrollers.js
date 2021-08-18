@@ -1,10 +1,10 @@
 
 const mongoose = require('mongoose')
 const express=require('express');
+const multer=require('multer');
 var passport=require('passport');
 const jwt=require('jsonwebtoken');
-// var localpassport=require('passport-local').Strategy;
-// const googleStrategy=require('passport-google-oauth').OAuth2Strategy;
+
 
 let ObjectId = mongoose.Types.ObjectId;
 
@@ -16,6 +16,7 @@ require('../config/passportconfig')
 
 
 var session=require('express-session');
+const { json } = require('body-parser');
 
 
 
@@ -89,26 +90,65 @@ module.exports.authenticate=(req,res,next)=>{
 
 
 
+//Image uploading
 
-//CREATING A JOB
-module.exports.createJob=async(req,res)=>{
-    console.log(req.body);
-    //for finding the maximum jobid number
-    const num=await jobData.find({},{job_id: 1}).sort({job_id:-1}).limit(1)
-    console.log({num});
-    var idjob=num[0].job_id+1;
-    console.log(idjob);
+module.exports.displayfile=(req,res)=>{
+    res.sendFile(__dirname+"/views/file.html");
   
+  }
 
-var job=new jobData({
-    job_id:idjob,
-    job_name:req.body.job_name,
-    job_hours:req.body.job_hours,
-    // userid:ObjectId(req.body.userid),
-    userid:req.body.userid
-});
-//console.log({job})
-job.save().then((docs)=>{
+var storage=multer.diskStorage({
+
+    destination:(req,file,cb)=>{
+      cb(null,'./uploads');
+    },
+    filename:(req,file,cb)=>{
+      cb(null,file.originalname);
+    }
+  
+    })
+  
+  
+  
+    var upload=multer({storage:storage}).single('image');
+
+    //CREATING A JOB
+  
+    module.exports.createJob=async(req,res)=>{
+        console.log(req.body);
+           //for finding the maximum jobid number
+            const num=await jobData.find({},{job_id: 1}).sort({job_id:-1}).limit(1)
+            console.log({num});
+            console.log("AFTER NUM",req.body)
+            let idjob=1;
+            if(num.length){
+                 idjob=num[0].job_id+1;
+            }
+            let requestBody = {...req.body};
+            console.log(idjob);
+
+                 upload(req,res,async(err)=>{
+                                          if(err)
+                                            console.log("error in uploading file" +err);
+  
+                                        else{
+                                      //console.log(req.file.path);
+  
+                                   const url=req.protocol+ '://' + req.get("host");
+                                 req.body.imageUrl=url+"/uploads/"+req.file.filename;
+                              console.log("BEFORE JOB OBJECT",req.body);
+                            
+                           var job=new jobData({
+
+                                     job_id:idjob,
+                                     job_name:req.body.job_name,
+                                     job_hours:req.body.job_hours,
+                                     userid:requestBody.userid,
+                                     image:req.body.imageUrl
+    
+                                            });
+                                   console.log({job})
+await job.save().then((docs)=>{
     return res.status(200).json({
         message:"new job entered successfully",
         success:true,
@@ -122,16 +162,23 @@ job.save().then((docs)=>{
         error:err.message
     })
 })
-}
-
+console.log(req.file);
+}        
+  
+        })
+      }
+    
 
 //FOR DISPLAYING THE NUMBER OF JOBS ASSIGNED TO A PARTICULAR USER
 module.exports.displayUserJoB=(req,res)=>{
-    console.log(req.body);
-    let jobdata=jobData.find({userid:req.body.userid}).exec().then((docs)=>{
+    var obj=JSON.stringify(req.body);
+    console.log("This is my Obj"+obj)
+    jobData.find({userid:req.body.userid}).then((docs)=>{
+            console.log("hsdlkfaslkdf");
         let dataJob=docs;
-       console.log(docs);
+       console.log({dataJob});
        regData.find({_id:req.body.userid}).exec().then((docs)=>{
+           console.log("welcome")
           let userinfo= {docs,dataJob}
         return res.status(200).json({
             success:true,
@@ -149,6 +196,10 @@ module.exports.displayUserJoB=(req,res)=>{
   })
   }
 
+
+
+
+  
 
 
   

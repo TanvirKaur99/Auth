@@ -30,6 +30,9 @@ var JobSchema=mongoose.Schema({
         type:Date,
         default:Date.now()
       },
+      image:{
+        type:String
+         }
     
    
 });
